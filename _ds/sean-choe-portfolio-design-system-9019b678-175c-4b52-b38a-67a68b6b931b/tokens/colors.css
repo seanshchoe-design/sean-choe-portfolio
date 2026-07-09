@@ -1,0 +1,103 @@
+/* ============================================================
+   COLOR SYSTEM
+   Dark is the default (:root). Light mode via [data-theme="light"].
+   Base palette = raw values. Semantic aliases = what you actually use.
+   Warm, editorial, near-monochrome with a single terracotta accent.
+   ============================================================ */
+
+:root {
+  /* --- Base neutrals (warm-tinted, dark ramp) --- */
+  --ink-950: #0B0B0C;   /* deepest bg */
+  --ink-900: #101011;
+  --ink-850: #151517;
+  --ink-800: #1A1A1C;
+  --ink-700: #232326;
+  --ink-600: #2E2E31;
+  --ink-500: #45454A;
+  --ink-400: #6E6D69;
+  --ink-300: #9A9995;
+  --ink-200: #C4C2BC;
+  --ink-100: #E6E4DE;
+  --ink-050: #F5F3EE;   /* warm paper white */
+
+  /* --- Accent (terracotta) --- */
+  --clay-600: #B84A26;
+  --clay-500: #D45B31;
+  --clay-400: #E0653C;
+  --clay-300: #EC8560;
+  --clay-100: #F6C7B2;
+
+  /* --- Semantic support --- */
+  --green-400: #7FB88A;
+  --amber-400: #D9A94A;
+  --red-400:   #D96B5E;
+
+  /* ============ SEMANTIC ALIASES (DARK) ============ */
+  /* Surfaces */
+  --bg-base:      var(--ink-950);
+  --bg-sunken:    #060607;
+  --surface-1:    var(--ink-900);
+  --surface-2:    var(--ink-850);
+  --surface-card: var(--ink-850);
+  --surface-hover:var(--ink-800);
+
+  /* Text */
+  --text-primary:   var(--ink-050);
+  --text-secondary: var(--ink-300);
+  --text-muted:     var(--ink-400);
+  --text-inverse:   var(--ink-950);
+  --text-accent:    var(--clay-400);
+
+  /* Lines */
+  --border-subtle: rgba(245, 243, 238, 0.08);
+  --border-default:rgba(245, 243, 238, 0.14);
+  --border-strong: rgba(245, 243, 238, 0.28);
+
+  /* Accent roles */
+  --accent:        var(--clay-400);
+  --accent-hover:  var(--clay-300);
+  --accent-press:  var(--clay-500);
+  --accent-contrast: #17100C;
+
+  /* Feedback */
+  --success: var(--green-400);
+  --warning: var(--amber-400);
+  --danger:  var(--red-400);
+
+  /* Selection / focus */
+  --focus-ring: var(--clay-400);
+  --selection-bg: rgba(224, 101, 60, 0.28);
+}
+
+/* ============ LIGHT MODE ============ */
+[data-theme="light"] {
+  --bg-base:      #F5F3EE;
+  --bg-sunken:    #ECE9E2;
+  --surface-1:    #FBFAF7;
+  --surface-2:    #FFFFFF;
+  --surface-card: #FFFFFF;
+  --surface-hover:#F1EEE7;
+
+  --text-primary:   #17161A;
+  --text-secondary: #57564F;
+  --text-muted:     #83817A;
+  --text-inverse:   #F5F3EE;
+  --text-accent:    var(--clay-600);
+
+  --border-subtle: rgba(23, 22, 26, 0.08);
+  --border-default:rgba(23, 22, 26, 0.14);
+  --border-strong: rgba(23, 22, 26, 0.26);
+
+  --accent:        var(--clay-500);
+  --accent-hover:  var(--clay-600);
+  --accent-press:  var(--clay-600);
+  --accent-contrast: #FFFFFF;
+
+  --selection-bg: rgba(212, 91, 49, 0.20);
+}
+
+/* Dark is the default. Light mode is opt-in via [data-theme="light"] on <html>
+   (see ThemeToggle). We intentionally do NOT auto-switch on prefers-color-scheme:
+   dark is the brand default and the toggle handles the choice. */
+
+::selection { background: var(--selection-bg); }

@@ -1,0 +1,7 @@
+/* Webfonts — loaded from Google Fonts.
+   Display serif: Instrument Serif. Body sans: Hanken Grotesk. Mono: JetBrains Mono.
+   NOTE: served via Google's CSS API (@font-face rules resolve in-browser).
+   If you need self-hosted binaries, drop woff2 files in assets/fonts/ and
+   replace these imports with local @font-face rules. */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:ital,wght@0,300..800;1,300..700&family=JetBrains+Mono:wght@400;500;600&display=swap');
