@@ -174,9 +174,9 @@ function Nav({ route, go, fidget, setFidget }) {
 
   const controls = (
     <div style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-      <button onClick={() => setFidget(!fidget)} aria-pressed={fidget} title="Toggle fidget mode" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px 8px 11px", borderRadius: 999, border: "1px solid " + (fidget ? "transparent" : "var(--border-default)"), background: fidget ? "var(--accent)" : "color-mix(in srgb, var(--surface-1) 60%, transparent)", color: fidget ? "var(--accent-contrast, #fff)" : "var(--text-secondary)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", transition: "background var(--dur-base), color var(--dur-base)" }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="7.5" cy="7.5" r="3.2" /><circle cx="16.5" cy="16.5" r="3.2" /><path d="M7.5 10.7v6.3M16.5 13.3V7" /></svg>
-        Fidget mode
+      <button onClick={() => setFidget(!fidget)} aria-pressed={fidget} title="Toggle canvas mode" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px 8px 11px", borderRadius: 999, border: "1px solid " + (fidget ? "transparent" : "var(--border-default)"), background: fidget ? "var(--accent)" : "color-mix(in srgb, var(--surface-1) 60%, transparent)", color: fidget ? "var(--accent-contrast, #fff)" : "var(--text-secondary)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", transition: "background var(--dur-base), color var(--dur-base)" }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="6" x2="2" y2="6" /><line x1="22" y1="18" x2="2" y2="18" /><line x1="6" y1="2" x2="6" y2="22" /><line x1="18" y1="2" x2="18" y2="22" /></svg>
+        Canvas mode
       </button>
       {ThemeToggle ? <ThemeToggle size={36} /> : null}
     </div>
@@ -316,11 +316,13 @@ function HomeScreen({ go }) {
     heroInner: { position: "relative", zIndex: 1 },
     hero: { padding: "clamp(2rem, 6vw, 4rem) clamp(1.25rem, 5vw, 4rem) clamp(0.5rem, 1.5vw, 1rem)", maxWidth: 1240, margin: "0 auto" },
     kicker: { marginBottom: "var(--space-6)" },
-    title: { fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(3rem, 8vw, 6.5rem)", lineHeight: 1.0, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: 0, textWrap: "balance" },
+    title: { fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2.5rem, 6.5vw, 5.25rem)", lineHeight: 1.0, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: 0, textWrap: "balance" },
     it: { fontStyle: "italic", color: "var(--text-accent)" },
     lead: { marginTop: "var(--space-6)", maxWidth: "68ch", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "clamp(1rem, 1.6vw, 1.25rem)", lineHeight: 1.7, color: "var(--text-secondary)" },
-    pillCedar: { display: "inline-flex", alignItems: "center", background: "#DEFF88", color: "#17100C", borderRadius: 999, padding: "0.08em 0.6em", margin: "0 0.15em", fontWeight: 600, fontSize: "0.92em", textDecoration: "none", verticalAlign: "middle", lineHeight: 1.1, transition: "filter var(--dur-base)" },
-    pillLeague: { display: "inline-flex", alignItems: "center", background: "#123FA6", color: "#F5F3EE", borderRadius: 999, padding: "0.14em 0.7em", margin: "0 0.15em", fontWeight: 600, fontSize: "0.8em", letterSpacing: "0.01em", textDecoration: "none", verticalAlign: "middle", lineHeight: 1.1, transition: "filter var(--dur-base)" },
+    pillCedar: { display: "inline-flex", alignItems: "center", background: "#B3F202", color: "#17100C", borderRadius: 999, padding: "0.34em 0.6em", margin: "0 0.15em", verticalAlign: "middle", lineHeight: 1, textDecoration: "none", transition: "filter var(--dur-base)" },
+    pillCedarImg: { height: "1.05em", width: "auto", display: "block" },
+    pillLeague: { display: "inline-flex", alignItems: "center", background: "#0C1B3A", borderRadius: 999, padding: "0.28em 0.6em", margin: "0 0.15em", verticalAlign: "middle", lineHeight: 1, textDecoration: "none", transition: "filter var(--dur-base)" },
+    pillLeagueImg: { height: "1.35em", width: "auto", display: "block" },
     section: { padding: "0 clamp(1.25rem, 5vw, 4rem)", maxWidth: 1240, margin: "0 auto" },
     label: { marginBottom: "var(--space-6)", marginTop: "var(--space-9)" },
     grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "clamp(1.5rem, 3vw, 2.5rem)" },
@@ -341,9 +343,8 @@ function HomeScreen({ go }) {
         <div style={h.card}>
           <div style={h.gridBg} aria-hidden="true"></div>
           <div style={h.heroInner}>
-            <h1 style={h.title}>Designing the moments where <span style={h.it}>money changes hands.</span></h1>
-            <p style={h.lead}>Staff Product designer
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="var(--text-accent)" style={{ verticalAlign: "-3px", margin: "0 0.15em" }} aria-hidden="true"><path d="M12 2l1.7 6.8L20 10.5l-6.3 1.7L12 19l-1.7-6.8L4 10.5l6.3-1.7z" /></svg>, driving growth and AI at <a href="https://www.cedar.com" target="_blank" rel="noopener noreferrer" style={h.pillCedar}>cedar</a> by day, creating art at <a href="https://theartstudentsleague.org" target="_blank" rel="noopener noreferrer" style={h.pillLeague}>The Art Students League</a> by night.</p>
+            <h1 style={h.title}>I own products end to end, <span style={h.it}>from the first insight to the last pixel.</span></h1>
+            <p style={h.lead}>Staff Product Designer at <a href="https://www.cedar.com" target="_blank" rel="noopener noreferrer" aria-label="Cedar" style={h.pillCedar}><img src="assets/cedar-logo.png" alt="Cedar" style={h.pillCedarImg} /></a>, working on payments and the AI-native experiences by day, studying fine art at <a href="https://www.artstudentsleague.org/" target="_blank" rel="noopener noreferrer" aria-label="The Art Students League" style={h.pillLeague}><img src="assets/asl-logo.svg" alt="The Art Students League" style={h.pillLeagueImg} /></a> by night.</p>
           </div>
           <div className="scp-deckwrap" style={{ position: "relative", zIndex: 1, marginTop: "clamp(1.5rem, 4vw, 3rem)", maxWidth: 980, marginLeft: "auto", marginRight: "auto" }}>
             <FeatureDeck tiles={tiles} fan={true} fanDeg={3.5} gap="0px" tileStyle={{ margin: "0 clamp(-14px, -1.1vw, -7px)" }} style={{ paddingTop: 0 }} />
@@ -773,17 +774,31 @@ function FidgetStage({ onExit, go }) {
   }, []);
 
   const W = dims.w, H = dims.h;
-  const cards = D.work.map((item, i) => ({ item, x: [0.1, 0.31, 0.52, 0.68, 0.84][i % 5], y: [0.36, 0.56, 0.32, 0.58, 0.4][i % 5] }));
+  const CARD_W = 236, CARD_H = 200;
+  // Randomize card layout once per mount (every time fidget mode loads).
+  const cards = React.useMemo(() => {
+    const marginX = 24, topSafe = 150, bottomSafe = 24;
+    const availW = Math.max(CARD_W, W - marginX * 2 - CARD_W);
+    const availH = Math.max(CARD_H, H - topSafe - bottomSafe - CARD_H);
+    return D.work.map((item) => ({
+      item,
+      px: marginX + Math.random() * availW,
+      py: topSafe + Math.random() * availH,
+      rot: (Math.random() - 0.5) * 12,
+    }));
+  }, []);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 900, background: "var(--bg-base)", overflow: "hidden", animation: "scp-fade var(--dur-base) var(--ease-out)" }}>
       <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(color-mix(in srgb, var(--text-primary) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 5%, transparent) 1px, transparent 1px)", backgroundSize: "44px 44px", pointerEvents: "none" }}></div>
       <div style={{ position: "absolute", top: 100, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)" }}>Fidget mode — drag the cards, or click one to open · press Esc to exit</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)" }}>Canvas mode — drag the cards, or click one to open · press Esc to exit</div>
       </div>
       {cards.map((c, i) => (
-        <Draggable key={"c" + i} initial={{ x: c.x * W, y: c.y * H }} size={{ w: 236, h: 200 }} nextZ={nextZ} onActivate={() => { onExit(); go({ name: "case", slug: c.item.slug }); }}>
-          <FidgetCard item={c.item} />
+        <Draggable key={"c" + i} initial={{ x: c.px, y: c.py }} size={{ w: CARD_W, h: CARD_H }} nextZ={nextZ} onActivate={() => { onExit(); go({ name: "case", slug: c.item.slug }); }}>
+          <div style={{ transform: "rotate(" + c.rot + "deg)" }}>
+            <FidgetCard item={c.item} />
+          </div>
         </Draggable>
       ))}
     </div>
