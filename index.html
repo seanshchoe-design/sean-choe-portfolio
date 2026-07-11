@@ -20,14 +20,22 @@
   <meta name="ext-resource-dependency" content="assets/wordmark.svg" data-resource-id="wordmark" />
   <meta name="ext-resource-dependency" content="assets/cedar-logo.png" />
   <meta name="ext-resource-dependency" content="assets/asl-logo.svg" />
+  <meta name="ext-resource-dependency" content="assets/cursor.png" />
+  <meta name="ext-resource-dependency" content="assets/cursor.svg" />
+  <meta name="ext-resource-dependency" content="assets/cursor-raster.png" />
   <script src="_ds/sean-choe-portfolio-design-system-9019b678-175c-4b52-b38a-67a68b6b931b/_ds_bundle.js"></script>
   <style>
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body { background: var(--bg-base); color: var(--text-primary); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+    html[data-theme="light"] { --bg-base: #FFFCF3; }
+    @media (prefers-color-scheme: light) { html:not([data-theme]) { --bg-base: #FFFCF3; } }
     a { color: var(--text-accent); }
     a:hover { color: var(--accent-hover); }
+    a:hover, button:hover { background-color: rgba(21,112,239,0.12); border-radius: 4px; }
     @keyframes scp-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .scp-pill { display: inline-block; box-shadow: 0 0 0 0 rgba(21,112,239,0); border-radius: 999px; transition: box-shadow 160ms cubic-bezier(0.16,1,0.3,1); }
+    .scp-pill:hover { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px #1570EF; }
     @keyframes seanai-rise { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes seanai-bounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-4px); opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {

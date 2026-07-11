@@ -97,6 +97,7 @@ window.SCP_DATA = window.SCP_DATA || {
     { title: "Leather goods", medium: "Hand-cut, saddle-stitched", note: "Wallets and totes made at the bench on weekends. Vegetable-tanned, no hardware I did not set myself.", accent: "#B5893C" },
     { title: "Jewelry", medium: "Lost-wax casting, silver", note: "Small cast pieces. An excuse to design something you finish in a day and can hold.", accent: "#9A9995" },
     { title: "Industrial design", medium: "Objects & furniture", note: "One-off objects and a chair or two. Where the interest in materials and payments both started.", accent: "#6E6D69" },
+    { title: "Fashion design", medium: "Patternmaking, natural fibers", note: "Cut-and-sew garments drafted from scratch. Learning where structure ends and drape begins.", accent: "#8A7A6A" },
   ],
 };
 
@@ -128,9 +129,10 @@ function Nav({ route, go, fidget, setFidget }) {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  const items = [["home", "Home"], ["work", "Work"], ["fun", "Fun"], ["about", "About"]];
-  const activeSection = route.name === "case" ? "work" : route.name === "work" ? "work" : route.name;
-  const activeIndex = Math.max(0, items.findIndex(([id]) => id === activeSection));
+  const items = [["home", "Home"], ["canvas", "Work", true], ["fun", "Fun"], ["about", "About"]];
+  const activeSection = (route.name === "case" || route.name === "work") ? "canvas" : (route.name === "resume" ? "about" : route.name);
+  const canvasIndex = items.findIndex(([id]) => id === "canvas");
+  const activeIndex = fidget ? canvasIndex : Math.max(0, items.findIndex(([id]) => id === activeSection));
 
   const listRef = React.useRef(null);
   const btnRefs = React.useRef([]);
@@ -143,7 +145,7 @@ function Nav({ route, go, fidget, setFidget }) {
     const list = listRef.current;
     if (!btn || !list) return;
     setPill({ left: btn.offsetLeft, top: btn.offsetTop, width: btn.offsetWidth, height: btn.offsetHeight });
-  }, [targetIndex, route.name]);
+  }, [targetIndex, route.name, fidget]);
 
   const bar = isMobile
     ? { position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, display: "flex", flexDirection: "column", alignItems: "stretch", gap: 12, padding: "14px clamp(1rem, 4vw, 1.5rem)", pointerEvents: "none" }
@@ -155,18 +157,23 @@ function Nav({ route, go, fidget, setFidget }) {
     : { pointerEvents: "auto", position: "absolute", left: "50%", top: 14, transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 4, padding: 6, background: "color-mix(in srgb, var(--surface-1) 55%, transparent)", backdropFilter: "blur(18px) saturate(180%)", WebkitBackdropFilter: "blur(18px) saturate(180%)", borderRadius: 999, border: "1px solid color-mix(in srgb, var(--text-primary) 14%, transparent)", boxShadow: "0 10px 34px -12px rgba(0,0,0,0.45), inset 0 1px 0 color-mix(in srgb, #fff 35%, transparent), inset 0 -1px 1px color-mix(in srgb, #000 18%, transparent)" };
   const linkBase = { background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", padding: isMobile ? "9px 14px" : "9px 18px", borderRadius: 999, whiteSpace: "nowrap", position: "relative", zIndex: 1, transition: "color 120ms" };
 
-  const linksBar = !fidget && (
+  const linksBar = (
     <div ref={listRef} style={links} onMouseLeave={() => setHoverIndex(null)}>
       {pill && (
         <span aria-hidden="true" style={{ position: "absolute", left: pill.left, top: pill.top, width: pill.width, height: pill.height, borderRadius: 999, background: hoverIndex == null ? "var(--accent)" : "color-mix(in srgb, var(--text-primary) 12%, transparent)", boxShadow: hoverIndex == null ? "0 2px 10px -2px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 35%, transparent)" : "inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent)", transition: "left 420ms var(--ease-out, cubic-bezier(0.22,1,0.36,1)), top 420ms, width 420ms, background 260ms", zIndex: 0 }} />
       )}
-      {items.map(([id, label], i) => {
+      {items.map(([id, label, isToggle], i) => {
         const isActive = i === activeIndex;
         const isHovered = i === hoverIndex;
         return (
           <button key={id} ref={(el) => (btnRefs.current[i] = el)}
-            style={{ ...linkBase, color: isActive && hoverIndex == null ? "var(--accent-contrast, #fff)" : isHovered ? "var(--text-accent)" : isActive ? "var(--text-primary)" : "var(--text-muted)" }}
-            onMouseEnter={() => setHoverIndex(i)} onClick={() => go({ name: id })}>{label}</button>
+            aria-pressed={isToggle ? fidget : undefined}
+            style={{ ...linkBase, display: "inline-flex", alignItems: "center", gap: 6, color: isActive && hoverIndex == null ? "var(--accent-contrast, #fff)" : isHovered ? "var(--text-accent)" : isActive ? "var(--text-primary)" : "var(--text-muted)" }}
+            onMouseEnter={() => setHoverIndex(i)}
+            onClick={() => { if (isToggle) { setFidget(!fidget); } else { if (fidget) setFidget(false); go({ name: id }); } }}>
+            {isToggle && (<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="22" y1="6" x2="2" y2="6" /><line x1="22" y1="18" x2="2" y2="18" /><line x1="6" y1="2" x2="6" y2="22" /><line x1="18" y1="2" x2="18" y2="22" /></svg>)}
+            {label}
+          </button>
         );
       })}
     </div>
@@ -174,10 +181,7 @@ function Nav({ route, go, fidget, setFidget }) {
 
   const controls = (
     <div style={{ pointerEvents: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-      <button onClick={() => setFidget(!fidget)} aria-pressed={fidget} title="Toggle canvas mode" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px 8px 11px", borderRadius: 999, border: "1px solid " + (fidget ? "transparent" : "var(--border-default)"), background: fidget ? "var(--accent)" : "color-mix(in srgb, var(--surface-1) 60%, transparent)", color: fidget ? "var(--accent-contrast, #fff)" : "var(--text-secondary)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", transition: "background var(--dur-base), color var(--dur-base)" }}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="6" x2="2" y2="6" /><line x1="22" y1="18" x2="2" y2="18" /><line x1="6" y1="2" x2="6" y2="22" /><line x1="18" y1="2" x2="18" y2="22" /></svg>
-        Canvas mode
-      </button>
+      <a href="mailto:hello@seanchoe.design" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 16px", borderRadius: 999, border: "1px solid var(--border-default)", background: "color-mix(in srgb, var(--surface-1) 60%, transparent)", color: "var(--text-primary)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", textDecoration: "none", transition: "background 0.2s ease, border-color 0.2s ease" }} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-hover)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "color-mix(in srgb, var(--surface-1) 60%, transparent)"; }}>Get in touch</a>
       {ThemeToggle ? <ThemeToggle size={36} /> : null}
     </div>
   );
@@ -208,7 +212,7 @@ function Nav({ route, go, fidget, setFidget }) {
 function Footer({ go }) {
   const f = {
     wrap: { borderTop: "1px solid var(--border-subtle)", marginTop: "var(--space-11)", padding: "var(--space-8) clamp(1.25rem, 5vw, 4rem) var(--space-7)", display: "flex", flexWrap: "wrap", gap: "var(--space-6)", justifyContent: "space-between", alignItems: "flex-end" },
-    big: { fontFamily: "var(--font-serif)", fontSize: "clamp(2rem, 6vw, 3.5rem)", lineHeight: 1.05, letterSpacing: "-0.01em", color: "var(--text-primary)", margin: 0, maxWidth: "14ch" },
+    big: { fontFamily: "var(--font-serif)", fontSize: "clamp(1.4rem, 3.4vw, 2.1rem)", lineHeight: 1.1, letterSpacing: "-0.01em", color: "var(--text-primary)", margin: 0, maxWidth: "16ch" },
     meta: { display: "flex", flexDirection: "column", gap: 6, fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" },
     a: { color: "var(--text-secondary)", textDecoration: "none", borderBottom: "1px solid var(--border-default)", paddingBottom: 1, cursor: "pointer" },
   };
@@ -270,9 +274,9 @@ function VideoLightbox({ open, onClose }) {
 
 function TiredOfReadingPeek() {
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, justifyContent: "center", transform: "rotate(-3deg)", marginBottom: 54 }}>
-      <span style={{ fontFamily: "'Caveat', cursive", fontWeight: 700, fontSize: "1.55rem", lineHeight: 1.1, color: "var(--text-accent)", whiteSpace: "nowrap", textAlign: "center" }}>In case you are<br />tired of reading</span>
-      <svg width="58" height="52" viewBox="0 0 58 52" fill="none" style={{ flexShrink: 0, marginBottom: -14 }}>
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 5, justifyContent: "center", transform: "rotate(-3deg)", marginBottom: 32 }}>
+      <span style={{ fontFamily: "'Caveat', cursive", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1.1, color: "var(--text-accent)", whiteSpace: "nowrap", textAlign: "center" }}>In case you are<br />tired of reading</span>
+      <svg width="48" height="43" viewBox="0 0 58 52" fill="none" style={{ flexShrink: 0, marginBottom: -12 }}>
         <path d="M3 6C22 4 44 8 50 26c1.6 4.8 1.4 10 0.4 16" stroke="var(--text-accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         <path d="M42 39c3 3 6 6 8.6 8.4M50.6 47.4c1.4-3.4 2.6-6.6 3.4-10" stroke="var(--text-accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       </svg>
@@ -316,7 +320,7 @@ function HomeScreen({ go }) {
     heroInner: { position: "relative", zIndex: 1 },
     hero: { padding: "clamp(2rem, 6vw, 4rem) clamp(1.25rem, 5vw, 4rem) clamp(0.5rem, 1.5vw, 1rem)", maxWidth: 1240, margin: "0 auto" },
     kicker: { marginBottom: "var(--space-6)" },
-    title: { fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2.5rem, 6.5vw, 5.25rem)", lineHeight: 1.0, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: 0, textWrap: "balance" },
+    title: { fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2.25rem, 5.6vw, 4.5rem)", lineHeight: 1.0, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: 0, textWrap: "balance" },
     it: { fontStyle: "italic", color: "var(--text-accent)" },
     lead: { marginTop: "var(--space-6)", maxWidth: "68ch", fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "clamp(1rem, 1.6vw, 1.25rem)", lineHeight: 1.7, color: "var(--text-secondary)" },
     pillCedar: { display: "inline-flex", alignItems: "center", background: "#B3F202", color: "#17100C", borderRadius: 999, padding: "0.34em 0.6em", margin: "0 0.15em", verticalAlign: "middle", lineHeight: 1, textDecoration: "none", transition: "filter var(--dur-base)" },
@@ -344,9 +348,9 @@ function HomeScreen({ go }) {
           <div style={h.gridBg} aria-hidden="true"></div>
           <div style={h.heroInner}>
             <h1 style={h.title}>I own products end to end, <span style={h.it}>from the first insight to the last pixel.</span></h1>
-            <p style={h.lead}>Staff Product Designer at <a href="https://www.cedar.com" target="_blank" rel="noopener noreferrer" aria-label="Cedar" style={h.pillCedar}><img src="assets/cedar-logo.png" alt="Cedar" style={h.pillCedarImg} /></a>, working on payments and the AI-native experiences by day, studying fine art at <a href="https://www.artstudentsleague.org/" target="_blank" rel="noopener noreferrer" aria-label="The Art Students League" style={h.pillLeague}><img src="assets/asl-logo.svg" alt="The Art Students League" style={h.pillLeagueImg} /></a> by night.</p>
+            <p style={h.lead}>Staff Product Designer at <a href="https://www.cedar.com" target="_blank" rel="noopener noreferrer" aria-label="Cedar" className="scp-pill" style={h.pillCedar}><img src="assets/cedar-logo.png" alt="Cedar" style={h.pillCedarImg} /></a>, working on payments and the AI-native experiences by day, studying fine art at <a href="https://www.artstudentsleague.org/" target="_blank" rel="noopener noreferrer" aria-label="The Art Students League" className="scp-pill" style={h.pillLeague}><img src="assets/asl-logo.svg" alt="The Art Students League" style={h.pillLeagueImg} /></a> by night.</p>
           </div>
-          <div className="scp-deckwrap" style={{ position: "relative", zIndex: 1, marginTop: "clamp(1.5rem, 4vw, 3rem)", maxWidth: 980, marginLeft: "auto", marginRight: "auto" }}>
+          <div className="scp-deckwrap" style={{ position: "relative", zIndex: 1, marginTop: "clamp(2.75rem, 6vw, 5rem)", maxWidth: 980, marginLeft: "auto", marginRight: "auto" }}>
             <FeatureDeck tiles={tiles} fan={true} fanDeg={3.5} gap="0px" tileStyle={{ margin: "0 clamp(-14px, -1.1vw, -7px)" }} style={{ paddingTop: 0 }} />
           </div>
         </div>
@@ -383,11 +387,6 @@ function WorkIndexScreen({ go }) {
   };
   return (
     <div style={w.wrap}>
-      <header style={w.head}>
-        <SectionLabel>Product design · 2020 to now</SectionLabel>
-        <h1 style={w.title}>Work</h1>
-        <p style={w.sub}>Ten years across payments, e-commerce, workspace, and cultural institutions. The through line is clarity at the moment a decision gets made.</p>
-      </header>
       <div style={w.list}>
         {D.work.map((p, i) => (
           <ProjectListRow key={p.slug} index={String(i + 1).padStart(2, "0")} company={p.company} title={p.title} role={p.role} year={p.year} onClick={(e) => { e.preventDefault(); go({ name: "case", slug: p.slug }); }} />
@@ -481,7 +480,8 @@ function CaseStudyScreen({ slug, go }) {
 /* About                                                               */
 /* ------------------------------------------------------------------ */
 function AboutScreen({ go }) {
-  const { SectionLabel, Tag, Button } = DS();
+  const { SectionLabel, Tag, Button, ProjectListRow } = DS();
+  const D = window.SCP_DATA;
   const a = {
     wrap: { padding: "clamp(2.5rem, 7vw, 5rem) clamp(1.25rem, 5vw, 4rem)", maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: "clamp(2rem, 6vw, 5rem)", alignItems: "start" },
     left: { minWidth: 0 },
@@ -497,32 +497,162 @@ function AboutScreen({ go }) {
     rowC: { color: "var(--text-primary)" },
     rowY: { fontFamily: "var(--font-mono)", color: "var(--text-muted)", fontSize: 12 },
     tags: { display: "flex", gap: 8, flexWrap: "wrap" },
+    workSection: { padding: "0 clamp(1.25rem, 5vw, 4rem) clamp(2.5rem, 7vw, 5rem)", maxWidth: 1100, margin: "0 auto" },
+    workHead: { marginBottom: "var(--space-6)" },
+    workTitle: { fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: "var(--space-4) 0 0" },
+    workList: { borderTop: "1px solid var(--border-subtle)" },
+    aboutName: { fontFamily: "var(--font-mono)", fontSize: "clamp(1.05rem, 2vw, 1.35rem)", letterSpacing: "0.02em", color: "var(--text-primary)", margin: 0 },
+    aboutDisc: { fontFamily: "var(--font-mono)", fontSize: "clamp(1.15rem, 2.4vw, 1.7rem)", lineHeight: 1.4, letterSpacing: "0.01em", color: "var(--text-primary)", margin: "clamp(18px, 2.5vw, 28px) 0 0", textWrap: "balance" },
+    aboutBio: { fontFamily: "var(--font-mono)", fontSize: "0.95rem", lineHeight: 1.75, color: "var(--text-muted)", margin: "0 0 var(--space-5)" },
+    aboutEm: { color: "var(--text-primary)" },
+    resumeBtn: { display: "inline-flex", alignItems: "center", gap: 10, padding: "13px 22px", borderRadius: 999, background: "transparent", color: "var(--text-primary)", fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em", textDecoration: "none", border: "1px solid var(--border-default)", cursor: "pointer", transition: "background var(--dur-base), border-color var(--dur-base)" },
+    resumeSub: { display: "block", marginTop: 12, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" },
+    expRow: { display: "grid", gridTemplateColumns: "minmax(130px, 0.6fr) minmax(0, 1.4fr) auto", alignItems: "center", gap: "clamp(1.25rem, 4vw, 3rem)", padding: "clamp(24px, 3vw, 34px) 0", borderBottom: "1px solid var(--border-subtle)" },
+    expYear: { fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-primary)", whiteSpace: "nowrap" },
+    expMid: { display: "flex", flexDirection: "column", gap: 12, minWidth: 0 },
+    expCompany: { fontFamily: "var(--font-mono)", fontSize: 14, letterSpacing: "0.04em", color: "var(--text-primary)" },
+    expRole: { fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em", lineHeight: 1.5, color: "var(--text-muted)" },
+    expLogo: { justifySelf: "end", minWidth: 132, height: 56, display: "flex", alignItems: "center", justifyContent: "center", border: "1px dashed var(--border-default)", borderRadius: 10, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", textAlign: "center", padding: "0 14px" },
   };
+  const workRanges = { cedar: "2024 - Current", chewy: "2023 - 2024", wework: "2022 - 2023", coach: "2021 - 2022", met: "2020 - 2021" };
   const timeline = [["Cedar", "2023 to now"], ["Chewy", "2022 to 2023"], ["WeWork", "2021 to 2022"], ["Coach", "2020 to 2021"], ["The Met", "2019 to 2020"]];
   return (
+    <React.Fragment>
     <div style={a.wrap}>
       <div style={a.left}>
-        <SectionLabel>About</SectionLabel>
-        <h1 style={a.title}>I design for the moment a person decides to trust a product with something that matters.</h1>
-        <p style={a.lead}>Usually that something is money. Sometimes it is a pet's medication, a workspace, or a museum's collection.</p>
-        <p style={a.para}>I am a Staff Product Designer with ten years across payments, e-commerce, workspace, and cultural institutions. I like the unglamorous parts of a product: the checkout, the bill, the approval step, the empty state. They are where trust is won or lost.</p>
-        <p style={a.para}>Lately my strongest work has been AI-native: designing assistants that explain a charge, a claim, or a plan in plain language, without pretending the hard parts are simple. I care about craft, clear writing, and shipping.</p>
-        <p style={a.para}>Outside of screens I make things with my hands, which is where the interest in materials and payments both started.</p>
-        <div style={{ marginTop: "var(--space-6)" }}><Button variant="solid" onClick={() => go({ name: "work" })}>See the work</Button></div>
+        <p style={a.aboutName}>Sean Soonho Choe</p>
+        <h1 style={a.aboutDisc}>Product Design / Payments / AI-Native Experiences / Design Systems</h1>
+        <div style={{ marginTop: "clamp(28px, 4vw, 48px)" }}>
+          <p style={a.aboutBio}>I am a Staff Product Designer focused on the moments where money changes hands. Currently working at <span style={a.aboutEm}>Cedar</span> in New York on patient billing and AI-native product work.</p>
+          <p style={a.aboutBio}>I have a decade of work across payments, e-commerce, workspace, and cultural institutions, including <span style={a.aboutEm}>Chewy</span>, <span style={a.aboutEm}>WeWork</span>, <span style={a.aboutEm}>Coach</span>, and <span style={a.aboutEm}>The Metropolitan Museum of Art</span>. I like the unglamorous parts of a product: the checkout, the bill, the approval step, the empty state.</p>
+          <p style={a.aboutBio}>When I am not working on commercial things, I find joy in making things with my hands: leather, silver, and small objects.</p>
+        </div>
+        <div style={{ marginTop: "var(--space-6)" }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); go({ name: "resume" }); }} style={a.resumeBtn} onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-hover, color-mix(in srgb, var(--text-primary) 6%, transparent))"; e.currentTarget.style.borderColor = "color-mix(in srgb, var(--text-primary) 28%, transparent)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "var(--border-default)"; }}>
+            View professional resume
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7" /><path d="M7 7h10v10" /></svg>
+          </a>
+        </div>
       </div>
       <aside style={a.side}>
         <div style={a.portrait}><span style={a.portraitName}>SC</span></div>
-        <div style={a.block}>
-          <div style={a.k}>Experience</div>
-          {timeline.map(([co, y]) => (<div key={co} style={a.row}><span style={a.rowC}>{co}</span><span style={a.rowY}>{y}</span></div>))}
-        </div>
-        <div style={a.block}>
-          <div style={a.k}>Focus</div>
-          <div style={a.tags}>
-            <Tag tone="accent">Payments</Tag><Tag>AI-native</Tag><Tag>Checkout</Tag><Tag>Design systems</Tag>
-          </div>
-        </div>
       </aside>
+    </div>
+    <section style={a.workSection}>
+      <header style={a.workHead}>
+        <SectionLabel index="01">Selected work</SectionLabel>
+        <h2 style={a.workTitle}>Work</h2>
+      </header>
+      <div style={{ ...a.workList, pointerEvents: "none" }}>
+        {D.work.map((p) => (
+          <div key={p.slug} style={a.expRow}>
+            <div style={a.expYear}>{workRanges[p.slug] || p.year} &gt;</div>
+            <div style={a.expMid}>
+              <div style={a.expCompany}>{p.company} //</div>
+              <div style={a.expRole}>{p.role}</div>
+            </div>
+            <div style={a.expLogo}>{p.company}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+    </React.Fragment>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Resume                                                              */
+/* ------------------------------------------------------------------ */
+function ResumeScreen({ go }) {
+  const { Button } = DS();
+  const groups = [
+    {
+      section: "Corporate / Startup Experience",
+      items: [
+        { title: "Cedar // Staff Product Designer", meta: "(Individual Contributor)", desc: "Leading payments and AI-native product design for patient billing. Placeholder summary, fill in later.", date: "2024 to Current" },
+        { title: "Chewy // Staff Product Designer", meta: "(Individual Contributor)", desc: "Pharmacy checkout and autoship. Placeholder summary, fill in later.", date: "2023 to 2024" },
+        { title: "WeWork // Senior Product Designer", meta: "(Individual Contributor)", desc: "Member workspace app. Placeholder summary, fill in later.", date: "2022 to 2023" },
+        { title: "Coach // Senior Product Designer", meta: "(Individual Contributor)", desc: "Commerce redesign. Placeholder summary, fill in later.", date: "2021 to 2022" },
+        { title: "The Met // Product Designer", meta: "(Individual Contributor)", desc: "Collection experience. Placeholder summary, fill in later.", date: "2020 to 2021" },
+      ],
+    },
+    {
+      section: "Agency Experience",
+      items: [
+        { title: "Agency name // Role", meta: "(Individual Contributor)", desc: "Placeholder description, fill in later.", date: "Year to Year" },
+        { title: "Agency name // Role", meta: "(Individual Contributor)", desc: "Placeholder description, fill in later.", date: "Year to Year" },
+      ],
+    },
+    {
+      section: "Internships",
+      items: [
+        { title: "Company // Product Design Intern", desc: "Placeholder description, fill in later.", date: "Year" },
+      ],
+    },
+    {
+      section: "Freelance Projects",
+      items: [
+        { title: "Client // Freelance Designer", desc: "Placeholder description, fill in later.", date: "Year" },
+      ],
+    },
+    {
+      section: "Education",
+      items: [
+        { title: "School // Degree", desc: "Placeholder description, fill in later.", date: "Year to Year" },
+      ],
+    },
+  ];
+  const contact = [
+    ["Email", "hello@seanchoe.design"],
+    ["Location", "New York"],
+    ["Site", "seanchoe.design"],
+  ];
+  const r = {
+    wrap: { padding: "clamp(2.5rem, 7vw, 5rem) clamp(1.25rem, 5vw, 4rem) clamp(3rem, 8vw, 6rem)", maxWidth: 940, margin: "0 auto" },
+    back: { marginBottom: "var(--space-6)" },
+    title: { fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2.25rem, 5vw, 3.5rem)", lineHeight: 1.02, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: "var(--space-4) 0 0" },
+    intro: { fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em", lineHeight: 1.7, color: "var(--text-muted)", margin: "18px 0 0", maxWidth: "60ch" },
+    group: { marginTop: "clamp(2.5rem, 5vw, 3.5rem)" },
+    groupLabel: { fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-accent)", margin: "0 0 var(--space-3)", paddingBottom: "var(--space-3)", borderBottom: "1px solid var(--border-subtle)" },
+    row: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(140px, auto)", gap: "clamp(1rem, 3vw, 2.5rem)", alignItems: "start", padding: "clamp(18px, 2.5vw, 26px) 0", borderBottom: "1px solid var(--border-subtle)" },
+    itemTitle: { fontFamily: "var(--font-mono)", fontSize: 14, letterSpacing: "0.03em", color: "var(--text-primary)", margin: 0 },
+    itemMeta: { fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.03em", color: "var(--text-muted)" },
+    itemDesc: { fontFamily: "var(--font-mono)", fontSize: 12.5, letterSpacing: "0.02em", lineHeight: 1.7, color: "var(--text-muted)", margin: "10px 0 0", maxWidth: "62ch" },
+    itemDate: { fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", justifySelf: "end", whiteSpace: "nowrap", paddingTop: 2 },
+    contactRow: { display: "grid", gridTemplateColumns: "minmax(120px, 180px) 1fr", gap: "clamp(1rem, 3vw, 2rem)", padding: "14px 0", borderBottom: "1px solid var(--border-subtle)" },
+    contactK: { fontFamily: "var(--font-mono)", fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)" },
+    contactV: { fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.03em", color: "var(--text-primary)" },
+  };
+  const Back = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>);
+  return (
+    <div style={r.wrap}>
+      <div style={r.back}><Button variant="ghost" size="sm" iconLeft={<Back />} onClick={() => go({ name: "about" })}>Back to about</Button></div>
+      <h1 style={r.title}>Resume</h1>
+      <p style={r.intro}>A full record of roles, projects, and study. Placeholder content for now, real detail to follow.</p>
+      {groups.map((g) => (
+        <section key={g.section} style={r.group}>
+          <div style={r.groupLabel}>{g.section}</div>
+          {g.items.map((it, i) => (
+            <div key={i} style={r.row}>
+              <div>
+                <p style={r.itemTitle}>{it.title}{it.meta ? <span style={r.itemMeta}>{"  "}{it.meta}</span> : null}</p>
+                <p style={r.itemDesc}>{it.desc}</p>
+              </div>
+              <div style={r.itemDate}>{it.date}</div>
+            </div>
+          ))}
+        </section>
+      ))}
+      <section style={r.group}>
+        <div style={r.groupLabel}>Contact Info</div>
+        {contact.map(([k, v]) => (
+          <div key={k} style={r.contactRow}>
+            <span style={r.contactK}>{k}</span>
+            <span style={r.contactV}>{v}</span>
+          </div>
+        ))}
+      </section>
+      <div style={{ marginTop: "clamp(2.5rem, 5vw, 3.5rem)" }}><Button variant="outline" onClick={() => go({ name: "work" })}>View work</Button></div>
     </div>
   );
 }
@@ -535,10 +665,14 @@ function FunScreen() {
   const D = window.SCP_DATA;
   const f = {
     wrap: { padding: "clamp(2.5rem, 7vw, 5rem) clamp(1.25rem, 5vw, 4rem)", maxWidth: 1100, margin: "0 auto" },
+    heroWrap: { padding: "clamp(0.75rem, 2vw, 1.5rem) clamp(1.25rem, 5vw, 4rem) 0", maxWidth: 1320, margin: "0 auto" },
+    heroCard: { position: "relative", overflow: "hidden", borderRadius: "clamp(20px, 2.5vw, 34px)", border: "1px solid var(--border-default)", background: "var(--surface-1)", padding: "clamp(1.75rem, 5vw, 3.5rem) clamp(1.5rem, 6vw, 5rem) clamp(2.25rem, 6vw, 4.5rem)" },
+    gridBg: { position: "absolute", inset: 0, display: "var(--hero-grid-display, block)", backgroundColor: "var(--hero-grid-tint, color-mix(in srgb, #6FA8E0 2%, transparent))", backgroundImage: "linear-gradient(var(--hero-grid-line, color-mix(in srgb, #6FA8E0 16%, transparent)) 1px, transparent 1px), linear-gradient(90deg, var(--hero-grid-line, color-mix(in srgb, #6FA8E0 16%, transparent)) 1px, transparent 1px)", backgroundSize: "clamp(22px, 2.2vw, 30px) clamp(22px, 2.2vw, 30px)", backgroundPosition: "center", maskImage: "radial-gradient(135% 130% at 50% 50%, #000 66%, transparent 100%)", WebkitMaskImage: "radial-gradient(135% 130% at 50% 50%, #000 66%, transparent 100%)", pointerEvents: "none" },
+    heroInner: { position: "relative", zIndex: 1, maxWidth: "52ch" },
     head: { maxWidth: "52ch", marginBottom: "var(--space-8)" },
     title: { fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "clamp(2.25rem, 5vw, 4rem)", lineHeight: 1.04, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: "var(--space-5) 0 var(--space-4)" },
     sub: { fontSize: "1.0625rem", lineHeight: 1.55, color: "var(--text-secondary)", margin: 0 },
-    grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "clamp(1.25rem, 3vw, 2rem)" },
+    grid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "clamp(1.25rem, 3vw, 2rem)" },
     card: { border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)", overflow: "hidden", background: "var(--surface-1)" },
     swatch: (accent) => ({ height: 160, background: `radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, ${accent} 40%, transparent), transparent 60%), var(--surface-2)` }),
     body: { padding: "var(--space-5)" },
@@ -547,23 +681,30 @@ function FunScreen() {
     cn: { fontSize: 14, lineHeight: 1.55, color: "var(--text-secondary)", margin: 0 },
   };
   return (
-    <div style={f.wrap}>
-      <header style={f.head}>
-        <SectionLabel>Other work</SectionLabel>
-        <h1 style={f.title}>Things I make with my hands.</h1>
-        <p style={f.sub}>Separate from the product work. Leather, silver, and objects. Kept here on purpose, because the discipline is different and the stakes are lower.</p>
-      </header>
-      <div style={f.grid}>
-        {D.fun.map((item) => (
-          <div key={item.title} style={f.card}>
-            <div style={f.swatch(item.accent)} />
-            <div style={f.body}>
-              <div style={f.cm}>{item.medium}</div>
-              <h3 style={f.ct}>{item.title}</h3>
-              <p style={f.cn}>{item.note}</p>
+    <div>
+      <div style={f.heroWrap}>
+        <div style={f.heroCard}>
+          <div style={f.gridBg} aria-hidden="true"></div>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={f.heroInner}>
+              <SectionLabel>Other work</SectionLabel>
+              <h1 style={f.title}>Things I make with my hands.</h1>
+              <p style={f.sub}>Separate from the product work. Leather, silver, and objects. Kept here on purpose, because the discipline is different and the stakes are lower.</p>
+            </div>
+            <div style={{ ...f.grid, marginTop: "clamp(2rem, 5vw, 3.5rem)" }}>
+              {D.fun.map((item) => (
+                <div key={item.title} style={f.card}>
+                  <div style={f.swatch(item.accent)} />
+                  <div style={f.body}>
+                    <div style={f.cm}>{item.medium}</div>
+                    <h3 style={f.ct}>{item.title}</h3>
+                    <p style={f.cn}>{item.note}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
@@ -746,15 +887,15 @@ function FidgetFace({ size, gradient, expr }) {
   );
 }
 
-function FidgetCard({ item }) {
+function FidgetCard({ item, width = 236 }) {
   return (
-    <div style={{ width: 236, borderRadius: 20, overflow: "hidden", background: "var(--surface-1)", border: "1px solid var(--border-default)", boxShadow: "0 10px 44px -16px rgba(0,0,0,0.3)" }}>
+    <div style={{ width, borderRadius: 20, overflow: "hidden", background: "var(--surface-1)", border: "1px solid var(--border-default)", boxShadow: "0 18px 50px -20px rgba(0,0,0,0.34)" }}>
       <div style={{ height: 128, background: `radial-gradient(130% 130% at 25% 15%, color-mix(in srgb, ${item.accent} 62%, transparent), transparent 60%), ${item.accent}`, position: "relative", display: "flex", alignItems: "flex-end", padding: 14 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.9)" }}>{item.year}</span>
       </div>
       <div style={{ padding: "14px 16px 16px" }}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>{item.company}</div>
-        <h3 style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontSize: "1.3rem", lineHeight: 1.1, color: "var(--text-primary)", margin: 0 }}>{item.title}</h3>
+        <h3 style={{ fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "1.3rem", lineHeight: 1.1, color: "var(--text-primary)", margin: 0 }}>{item.title}</h3>
       </div>
     </div>
   );
@@ -762,45 +903,128 @@ function FidgetCard({ item }) {
 
 function FidgetStage({ onExit, go }) {
   const D = window.SCP_DATA;
-  const zc = React.useRef(10);
-  const nextZ = () => (zc.current += 1);
-  const [dims, setDims] = React.useState({ w: window.innerWidth || 1280, h: window.innerHeight || 800 });
+  const scrollRef = React.useRef(null);
+  const [ww, setWW] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1280);
   React.useEffect(() => {
-    const set = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    const set = () => setWW((scrollRef.current && scrollRef.current.clientWidth) || window.innerWidth);
     set();
+    window.addEventListener("resize", set);
     const onKey = (ev) => { if (ev.key === "Escape") onExit(); };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("resize", set); document.removeEventListener("keydown", onKey); };
   }, []);
 
-  const W = dims.w, H = dims.h;
-  const CARD_W = 236, CARD_H = 200;
-  // Randomize card layout once per mount (every time fidget mode loads).
-  const cards = React.useMemo(() => {
-    const marginX = 24, topSafe = 150, bottomSafe = 24;
-    const availW = Math.max(CARD_W, W - marginX * 2 - CARD_W);
-    const availH = Math.max(CARD_H, H - topSafe - bottomSafe - CARD_H);
-    return D.work.map((item) => ({
-      item,
-      px: marginX + Math.random() * availW,
-      py: topSafe + Math.random() * availH,
-      rot: (Math.random() - 0.5) * 12,
-    }));
-  }, []);
+  // Career journey: newest first, top to bottom, connected by a dashed path.
+  const projects = D.work;
+  const n = projects.length;
+  const isNarrow = ww <= 720;
+  const contentW = Math.min(1040, ww);
+  const cardW = isNarrow ? Math.min(320, contentW - 40) : 300;
+  const cardH = 210;
+  const padX = isNarrow ? (contentW - cardW) / 2 : Math.round(contentW * 0.06);
+  const topPad = 150;
+  const yStep = isNarrow ? 268 : 300;
+  const nodes = projects.map((item, i) => {
+    const rightSide = !isNarrow && i % 2 === 0;
+    const x = isNarrow ? padX : (rightSide ? contentW - cardW - padX : padX);
+    const y = topPad + i * yStep;
+    return { item, x, y, cx: x + cardW / 2, cy: y + cardH / 2 };
+  });
+  const stageH = topPad + (n - 1) * yStep + cardH + 160;
+
+  const path = React.useMemo(() => {
+    if (nodes.length < 2) return "";
+    // seeded RNG so the wobble is stable across re-renders
+    let seed = 0x9e3779b9 ^ Math.round(contentW) ^ (isNarrow ? 7 : 0) ^ (n * 131);
+    const rand = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const bez = (a, c1, c2, b, t) => { const u = 1 - t; return u * u * u * a + 3 * u * u * t * c1 + 3 * u * t * t * c2 + t * t * t * b; };
+    const pts = [];
+    for (let i = 1; i < nodes.length; i++) {
+      const a = nodes[i - 1], b = nodes[i];
+      const midY = (a.cy + b.cy) / 2;
+      const c1x = a.cx, c2x = b.cx, c1y = midY, c2y = midY;
+      const steps = Math.max(14, Math.round((Math.abs(b.cx - a.cx) + Math.abs(b.cy - a.cy)) / 22));
+      const phase = rand() * Math.PI * 2;
+      const freq = 2 + rand() * 1.6;
+      for (let s = (i === 1 ? 0 : 1); s <= steps; s++) {
+        const t = s / steps;
+        const eps = 0.001;
+        const x = bez(a.cx, c1x, c2x, b.cx, t), y = bez(a.cy, c1y, c2y, b.cy, t);
+        const x2 = bez(a.cx, c1x, c2x, b.cx, Math.min(1, t + eps)), y2 = bez(a.cy, c1y, c2y, b.cy, Math.min(1, t + eps));
+        let dx = x2 - x, dy = y2 - y; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+        const taper = Math.sin(Math.PI * t); // 0 at the nodes, 1 mid-segment
+        const wob = (Math.sin(t * Math.PI * freq + phase) * 6.5 + (rand() - 0.5) * 5) * taper;
+        pts.push({ x: x - dy * wob, y: y + dx * wob });
+      }
+    }
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for (let k = 1; k < pts.length - 1; k++) {
+      const mx = (pts[k].x + pts[k + 1].x) / 2, my = (pts[k].y + pts[k + 1].y) / 2;
+      d += ` Q ${pts[k].x.toFixed(1)} ${pts[k].y.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+    }
+    const last = pts[pts.length - 1];
+    d += ` L ${last.x.toFixed(1)} ${last.y.toFixed(1)}`;
+    return d;
+  }, [contentW, isNarrow, n, cardW]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 900, background: "var(--bg-base)", overflow: "hidden", animation: "scp-fade var(--dur-base) var(--ease-out)" }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(color-mix(in srgb, var(--text-primary) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 5%, transparent) 1px, transparent 1px)", backgroundSize: "44px 44px", pointerEvents: "none" }}></div>
-      <div style={{ position: "absolute", top: 100, left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)" }}>Canvas mode — drag the cards, or click one to open · press Esc to exit</div>
+    <div ref={scrollRef} style={{ position: "fixed", inset: 0, zIndex: 900, background: "var(--bg-base)", overflowY: "auto", overflowX: "hidden", animation: "scp-fade var(--dur-base) var(--ease-out)" }}>
+      <div style={{ position: "relative", zIndex: 5, textAlign: "center", padding: "90px 1rem 8px", pointerEvents: "none", background: "linear-gradient(var(--bg-base) 62%, transparent)" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-accent)", marginBottom: 8 }}>Product design · 2020 to now</div>
+        <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 500, fontSize: "clamp(2rem, 5vw, 3.25rem)", lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--text-primary)", margin: 0 }}>Work</h2>
+        <p style={{ maxWidth: "44ch", margin: "16px auto 0", fontFamily: "var(--font-sans)", fontSize: "1.0625rem", lineHeight: 1.5, color: "var(--text-secondary)" }}>Ten years across payments, e-commerce, workspace, and cultural institutions. The through line is clarity at the moment a decision gets made.</p>
       </div>
-      {cards.map((c, i) => (
-        <Draggable key={"c" + i} initial={{ x: c.px, y: c.py }} size={{ w: CARD_W, h: CARD_H }} nextZ={nextZ} onActivate={() => { onExit(); go({ name: "case", slug: c.item.slug }); }}>
-          <div style={{ transform: "rotate(" + c.rot + "deg)" }}>
-            <FidgetCard item={c.item} />
+
+      <div style={{ position: "relative", width: contentW, margin: "0 auto", height: stageH, marginTop: -84 }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--text-primary) 4.5%, transparent) 1px, transparent 1px)", backgroundSize: "44px 44px", pointerEvents: "none" }}></div>
+        <svg width={contentW} height={stageH} style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "visible" }} aria-hidden="true">
+          <path d={path} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="0.5 13" opacity="0.85" />
+          {nodes.map((p, i) => (
+            <circle key={"dot" + i} cx={p.cx} cy={p.cy} r="5.5" fill="var(--bg-base)" stroke="var(--accent)" strokeWidth="2.5" />
+          ))}
+        </svg>
+        {nodes.map((p, i) => (
+          <div key={p.item.slug} style={{ position: "absolute", left: p.x, top: p.y, width: cardW, zIndex: 1 }}>
+            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1.6rem", color: "var(--text-accent)", marginBottom: 8, textAlign: p.x === padX && !isNarrow ? "left" : (isNarrow ? "center" : "right") }}>{p.item.year}</div>
+            <button onClick={() => { onExit(); go({ name: "case", slug: p.item.slug }); }} style={{ display: "block", width: "100%", padding: 0, border: "none", background: "none", cursor: "pointer", textAlign: "left", transition: "transform 320ms var(--ease-out, cubic-bezier(0.16,1,0.3,1))" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}>
+              <FidgetCard item={p.item} width={cardW} />
+            </button>
           </div>
-        </Draggable>
-      ))}
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Jam-style collaboration cursor                                      */
+/* ------------------------------------------------------------------ */
+function JamCursor({ color = "#E0653C" }) {
+  const [pos, setPos] = React.useState({ x: -100, y: -100 });
+  const [on, setOn] = React.useState(false);
+  const [name] = React.useState(() => {
+    const names = ["Guest", "Anonymous", "Lurker"];
+    return names[Math.floor(Math.random() * names.length)];
+  });
+  React.useEffect(() => {
+    const fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+    if (!fine) return;
+    document.documentElement.style.cursor = "none";
+    const move = (e) => { setPos({ x: e.clientX, y: e.clientY }); setOn(true); };
+    const leave = () => setOn(false);
+    window.addEventListener("pointermove", move);
+    document.addEventListener("mouseleave", leave);
+    return () => {
+      document.documentElement.style.cursor = "";
+      window.removeEventListener("pointermove", move);
+      document.removeEventListener("mouseleave", leave);
+    };
+  }, []);
+  if (!on) return null;
+  return (
+    <div style={{ position: "fixed", left: pos.x, top: pos.y, zIndex: 2147483647, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", left: -2, top: -2 }} dangerouslySetInnerHTML={{ __html: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g filter="url(#filter0_d_107_2)"><path d="M7.60439 19.2571L3.04581 3.26553C2.81043 2.43981 3.66805 1.72678 4.44788 2.09985L19.5506 9.32491C20.3536 9.70907 20.2932 10.8616 19.4546 11.1588L13.2432 13.3596C13.0176 13.4395 12.8284 13.5968 12.7098 13.8031L9.44381 19.4818C9.00282 20.2486 7.84677 20.1073 7.60439 19.2571Z" fill="#1570EF"></path><path d="M2.56279 3.40011C2.20972 2.16155 3.49566 1.09245 4.66538 1.652L19.7685 8.87711C20.9727 9.45348 20.8819 11.1816 19.6239 11.6273L13.4132 13.8282C13.3006 13.8681 13.206 13.9469 13.1466 14.0498L9.87992 19.7286C9.21849 20.8786 7.48514 20.6671 7.12135 19.392L2.56279 3.40011Z" stroke="#F2F2F2"></path></g><defs><filter id="filter0_d_107_2" x="0" y="0" width="23.1241" height="23.9793" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"></feColorMatrix><feOffset dy="1"></feOffset><feGaussianBlur stdDeviation="1"></feGaussianBlur><feComposite in2="hardAlpha" operator="out"></feComposite><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"></feColorMatrix><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_107_2"></feBlend><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_107_2" result="shape"></feBlend></filter></defs></svg>' }}></div>
+      <div style={{ position: "absolute", left: 16, top: 20, background: color, color: "#fff", fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: "0.02em", padding: "3px 8px", borderRadius: "4px 10px 10px 10px", whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>{name}</div>
     </div>
   );
 }
@@ -825,6 +1049,7 @@ function App() {
   else if (route.name === "work") screen = <WorkIndexScreen go={go} />;
   else if (route.name === "case") screen = <CaseStudyScreen slug={route.slug} go={go} />;
   else if (route.name === "about") screen = <AboutScreen go={go} />;
+  else if (route.name === "resume") screen = <ResumeScreen go={go} />;
   else if (route.name === "fun") screen = <FunScreen go={go} />;
   else screen = <HomeScreen go={go} />;
 
@@ -834,6 +1059,7 @@ function App() {
       <main key={route.name + (route.slug || "")} className="scp-main" style={{ paddingTop: 88, animation: "scp-fade var(--dur-reveal) var(--ease-out)" }}>{screen}</main>
       <Footer go={go} />
       <AskAI />
+      <JamCursor />
       {fidget ? <FidgetStage onExit={() => setFidget(false)} go={go} /> : null}
     </div>
   );
