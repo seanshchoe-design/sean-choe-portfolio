@@ -3296,6 +3296,11 @@ window.SCP_DATA = {
     medium: "Objects & furniture",
     note: "One-off objects and a chair or two. Where the interest in materials and payments both started.",
     accent: "#6E6D69"
+  }, {
+    title: "Fashion design",
+    medium: "Patternmaking, natural fibers",
+    note: "Cut-and-sew garments drafted from scratch. Learning where structure ends and drape begins.",
+    accent: "#8A7A6A"
   }]
 };
 })(); } catch (e) { __ds_ns.__errors.push({ path: "ui_kits/portfolio/data.js", error: String((e && e.message) || e) }); }
